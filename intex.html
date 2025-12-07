@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨宝宝专属：男娘属性深度测试✨</title>
+    <style>
+        :root {
+            --primary-pink: #ff9a9e;
+            --soft-pink: #fad0c4;
+            --deep-purple: #a18cd1;
+            --white: #ffffff;
+        }
+        body {
+            font-family: 'Comic Sans MS', '微软雅黑', sans-serif;
+            background: linear-gradient(120deg, var(--soft-pink) 0%, var(--primary-pink) 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #555;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+        }
+        h1 {
+            text-align: center;
+            color: var(--deep-purple);
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+        
+        /* 问题列表样式 */
+        .question-card {
+            background: #fff;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border: 1px solid #ffeef0;
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-pink);
+        }
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            color: #444;
+        }
+        
+        /* 选项样式 */
+        .options {
+            display: flex;
+            gap: 10px;
+        }
+        .option-label {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            font-size: 0.9em;
+            user-select: none;
+        }
+        /* 隐藏原生单选框 */
+        input[type="radio"] {
+            display: none;
+        }
+        
+        /* 选中状态 */
+        input[type="radio"]:checked + .option-label {
+            background: var(--primary-pink);
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 154, 158, 0.4);
+            transform: scale(1.05);
+        }
+        
+        /* 按钮样式 */
+        .btn-calculate {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--deep-purple);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(161, 140, 209, 0.4);
+            transition: transform 0.1s;
+        }
+        .btn-calculate:active {
+            transform: scale(0.98);
+        }
+
+        /* 结果弹窗 */
+        #result-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .result-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 80%;
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .result-title {
+            font-size: 2em;
+            color: var(--primary-pink);
+            margin: 10px 0;
+            font-weight: 800;
+        }
+        .result-score {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .close-btn {
+            margin-top: 20px;
+            padding: 10px 30px;
+            background: #eee;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💕 测测宝宝的男娘指数 💕</h1>
+    <div class="subtitle">请宝宝诚实回答以下问题哦~</div>
+
+    <form id="quizForm">
+        <div id="questions-container"></div>
+        
+        <button type="button" class="btn-calculate" onclick="calculateResult()">查看宝宝的成分</button>
+    </form>
+</div>
+
+<div id="result-modal">
+    <div class="result-content">
+        <div>宝宝的最终鉴定结果是...</div>
+        <div class="result-title" id="final-title">???</div>
+        <div class="result-score" id="final-score">男娘指数: 0</div>
+        <button class="close-btn" onclick="closeModal()">好哒，我知道了</button>
+    </div>
+</div>
+
+<script>
+    // 题目配置 (按你要求的顺序)
+    const questions = [
+        "宝宝你有无长头发？",
+        "宝宝你表情包是不是很多mygo，小猫娘？",
+        "宝宝你是不是想当个女性北朝？",
+        "宝宝你香不香软不软？",
+        "宝宝你想不想上我床？",
+        "宝宝你想不想要我的金叶？",
+        "宝宝你想不想尝尝我的？",
+        "宝宝你做自己就好。"
+    ];
+
+    const container = document.getElementById('questions-container');
+
+    // 动态生成题目
+    questions.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+            <div class="question-text">${index + 1}. ${q}</div>
+            <div class="options">
+                <input type="radio" name="q${index}" id="q${index}_yes" value="2">
+                <label class="option-label" for="q${index}_yes">是 (Yes)</label>
+
+                <input type="radio" name="q${index}" id="q${index}_dunno" value="1">
+                <label class="option-label" for="q${index}_dunno">不知道</label>
+
+                <input type="radio" name="q${index}" id="q${index}_no" value="0">
+                <label class="option-label" for="q${index}_no">不是 (No)</label>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    function calculateResult() {
+        let totalScore = 0;
+        let allAnswered = true;
+
+        // 遍历所有问题计算总分
+        for (let i = 0; i < questions.length; i++) {
+            const radios = document.getElementsByName(`q${i}`);
+            let val = null;
+            for (const radio of radios) {
+                if (radio.checked) {
+                    val = parseInt(radio.value);
+                    break;
+                }
+            }
+            
+            if (val === null) {
+                allAnswered = false;
+                // 让未填的题目闪烁一下提示
+                const card = radios[0].closest('.question-card');
+                card.style.borderColor = 'red';
+                setTimeout(() => card.style.borderColor = '#ffeef0', 1000);
+            } else {
+                totalScore += val;
+            }
+        }
+
+        if (!allAnswered) {
+            alert("宝宝还有题目没填完哦！🙅‍♂️");
+            return;
+        }
+
+        // 满分 16 分
+        let title = "";
+        
+        // 结果分级判定
+        if (totalScore >= 13) {
+            title = "👑 男娘本娘 👑"; // 13-16分
+        } else if (totalScore >= 9) {
+            title = "🌸 香香软软小男娘 🌸"; // 9-12分
+        } else if (totalScore >= 5) {
+            title = "🐱 软糯香甜男娘喵 🐱"; // 5-8分
+        } else {
+            title = "😒 口是心非傲娇男娘 😒"; // 0-4分
+        }
+
+        // 显示结果
+        document.getElementById('final-title').innerText = title;
+        document.getElementById('final-score').innerText = `当前指数: ${totalScore} / 16`;
+        document.getElementById('result-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('result-modal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
